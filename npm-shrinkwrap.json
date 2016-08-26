@@ -129,6 +129,11 @@
       "from": "brace-expansion@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.6.tgz"
     },
+    "browser-stdout": {
+      "version": "1.3.0",
+      "from": "browser-stdout@1.3.0",
+      "resolved": "https://registry.npmjs.org/browser-stdout/-/browser-stdout-1.3.0.tgz"
+    },
     "buffer-shims": {
       "version": "1.0.0",
       "from": "buffer-shims@>=1.0.0 <2.0.0",
@@ -307,6 +312,11 @@
       "version": "1.0.4",
       "from": "destroy@>=1.0.4 <1.1.0",
       "resolved": "https://registry.npmjs.org/destroy/-/destroy-1.0.4.tgz"
+    },
+    "diff": {
+      "version": "1.4.0",
+      "from": "diff@1.4.0",
+      "resolved": "https://registry.npmjs.org/diff/-/diff-1.4.0.tgz"
     },
     "doctrine": {
       "version": "1.3.0",
@@ -579,6 +589,11 @@
       "from": "graceful-readlink@>=1.0.0",
       "resolved": "https://registry.npmjs.org/graceful-readlink/-/graceful-readlink-1.0.1.tgz"
     },
+    "growl": {
+      "version": "1.9.2",
+      "from": "growl@1.9.2",
+      "resolved": "https://registry.npmjs.org/growl/-/growl-1.9.2.tgz"
+    },
     "har-validator": {
       "version": "2.0.6",
       "from": "har-validator@>=2.0.6 <2.1.0",
@@ -588,6 +603,11 @@
       "version": "2.0.0",
       "from": "has-ansi@>=2.0.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/has-ansi/-/has-ansi-2.0.0.tgz"
+    },
+    "has-flag": {
+      "version": "1.0.0",
+      "from": "has-flag@>=1.0.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/has-flag/-/has-flag-1.0.0.tgz"
     },
     "hawk": {
       "version": "3.1.3",
@@ -729,6 +749,11 @@
       "from": "json-stringify-safe@>=5.0.1 <5.1.0",
       "resolved": "https://registry.npmjs.org/json-stringify-safe/-/json-stringify-safe-5.0.1.tgz"
     },
+    "json3": {
+      "version": "3.3.2",
+      "from": "json3@3.3.2",
+      "resolved": "https://registry.npmjs.org/json3/-/json3-3.3.2.tgz"
+    },
     "jsonify": {
       "version": "0.0.0",
       "from": "jsonify@>=0.0.0 <0.1.0",
@@ -759,6 +784,31 @@
       "from": "lodash@>=4.0.0 <5.0.0",
       "resolved": "https://registry.npmjs.org/lodash/-/lodash-4.15.0.tgz"
     },
+    "lodash._baseassign": {
+      "version": "3.2.0",
+      "from": "lodash._baseassign@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash._baseassign/-/lodash._baseassign-3.2.0.tgz"
+    },
+    "lodash._basecopy": {
+      "version": "3.0.1",
+      "from": "lodash._basecopy@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash._basecopy/-/lodash._basecopy-3.0.1.tgz"
+    },
+    "lodash._basecreate": {
+      "version": "3.0.3",
+      "from": "lodash._basecreate@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash._basecreate/-/lodash._basecreate-3.0.3.tgz"
+    },
+    "lodash._getnative": {
+      "version": "3.9.1",
+      "from": "lodash._getnative@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash._getnative/-/lodash._getnative-3.9.1.tgz"
+    },
+    "lodash._isiterateecall": {
+      "version": "3.0.9",
+      "from": "lodash._isiterateecall@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash._isiterateecall/-/lodash._isiterateecall-3.0.9.tgz"
+    },
     "lodash.assignin": {
       "version": "4.2.0",
       "from": "lodash.assignin@>=4.0.9 <5.0.0",
@@ -773,6 +823,11 @@
       "version": "4.5.2",
       "from": "lodash.cond@>=4.3.0 <5.0.0",
       "resolved": "https://registry.npmjs.org/lodash.cond/-/lodash.cond-4.5.2.tgz"
+    },
+    "lodash.create": {
+      "version": "3.1.1",
+      "from": "lodash.create@3.1.1",
+      "resolved": "https://registry.npmjs.org/lodash.create/-/lodash.create-3.1.1.tgz"
     },
     "lodash.defaults": {
       "version": "4.2.0",
@@ -808,6 +863,21 @@
       "version": "4.5.0",
       "from": "lodash.foreach@>=4.3.0 <5.0.0",
       "resolved": "https://registry.npmjs.org/lodash.foreach/-/lodash.foreach-4.5.0.tgz"
+    },
+    "lodash.isarguments": {
+      "version": "3.1.0",
+      "from": "lodash.isarguments@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash.isarguments/-/lodash.isarguments-3.1.0.tgz"
+    },
+    "lodash.isarray": {
+      "version": "3.0.4",
+      "from": "lodash.isarray@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash.isarray/-/lodash.isarray-3.0.4.tgz"
+    },
+    "lodash.keys": {
+      "version": "3.1.2",
+      "from": "lodash.keys@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash.keys/-/lodash.keys-3.1.2.tgz"
     },
     "lodash.map": {
       "version": "4.6.0",
