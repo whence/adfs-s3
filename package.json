@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/whence/adfs-s3#readme",
   "dependencies": {
+    "aws-sdk": "^2.5.3",
     "cheerio": "^0.22.0",
     "express": "^4.14.0",
     "memory-cache": "^0.1.6",
