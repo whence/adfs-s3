@@ -1,7 +1,19 @@
 var request = require('request');
 var cheerio = require('cheerio');
+var AWS = require('aws-sdk');
 
-var fetchAssertion = function(host, username, password, done) {
+exports.isExpired = function (credentials, done) {
+    var iam = new AWS.IAM({ credentials: credentials });
+    iam.getAccountSummary(function (err) {
+        if (err) {
+            done(null, true);
+        } else {
+            done(null, false);
+        }
+    });
+};
+
+exports.fetchAssertion = function (host, username, password, done) {
     var url = 'https://' + host + '/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices';
     var form = {
         UserName: username,
@@ -37,13 +49,19 @@ var fetchAssertion = function(host, username, password, done) {
     });
 };
 
-var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('.config/main.json', { encoding: 'UTF8' }));
-
-fetchAssertion(config.host, config.username, config.password, function (err, data) {
-    if (err) {
-        console.log('ERROR: ' + err);
-    } else {
-        console.log(data);
-    }
-});
+exports.obtainCredentials = function (roleArn, principalArn, assertion, done) {
+    var params = {
+        PrincipalArn: principalArn,
+        RoleArn: roleArn,
+        SAMLAssertion: assertion,
+        DurationSeconds: 3600
+    };
+    var sts = new AWS.STS();
+    sts.assumeRoleWithSAML(params, function (err, data) {
+        if (err) {
+            done(err);
+        } else {
+            done(null, data.Credentials);
+        }
+    });
+};
