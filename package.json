@@ -4,6 +4,7 @@
   "description": "A Proxy for AWS S3 using ADFS for authentication",
   "main": "server.js",
   "scripts": {
+    "start": "node server.js",
     "test": "mocha",
     "check": "eslint ."
   },

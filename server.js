@@ -60,14 +60,23 @@ var generateCredentials = function (username, password, done) {
     });
 };
 
-var getS3Stream = function (bucket, key, credentials) {
+var pipeS3Stream = function (bucket, key, credentials, res, done) {
     var s3 = new AWS.S3({ credentials: credentials });
-    var stream = s3.getObject({
+    var request = s3.getObject({
         Bucket: bucket,
         Key: key
-    }).createReadStream();
-    console.log('Piping from S3 Bucket: ' + bucket + ' / Key: ' + key + '\n');
-    return stream;
+    });
+    var stream = request.createReadStream();
+    stream.pipe(res);
+
+    stream.on('success', function () {
+        console.log('Piped from S3 Bucket: ' + bucket + ' / Key: ' + key);
+        done(null);
+    });
+    stream.on('error', function () {
+        console.log('Failed to obtain S3 stream.');
+        done('Failed to pipe S3 stream');
+    });
 };
 
 var handleS3Request = function (req, res) {
@@ -75,40 +84,40 @@ var handleS3Request = function (req, res) {
     var key = req.params[1];
     var username = req.user.username;
     var password = req.user.password;
-    getCredentials(username, password, function (credentials) {
-        var stream = null;
-        if (credentials) {
-            try {
-                stream = getS3Stream(bucket, key, credentials);
-            } catch (e) {
-                console.log('First attempt to obtain S3 stream failed. Will re-authenticate with ADFS and try again.');
-            }
-        }
-        if (stream) {
-            stream.pipe(res);
-        } else {
-            generateCredentials(username, password, function (err, credentials) {
-                if (err) {
-                    res.statusCode = 401;
-                    res.send('401 Unauthorized');
-                } else {
-                    storeCredentials(username, password, credentials, function (err) {
-                        if (err) {
-                            res.statusCode = 401;
-                            res.send('Internal error');
-                        } else {
-                            try {
-                                stream = getS3Stream(bucket, key, credentials);
-                                stream.pipe(res);
-                            } catch (e) {
+
+    var refreshCredentials = function () {
+        generateCredentials(username, password, function (err, credentials) {
+            if (err) {
+                res.statusCode = 401;
+                res.send('401 Unauthorized');
+            } else {
+                storeCredentials(username, password, credentials, function (err) {
+                    if (err) {
+                        res.statusCode = 401;
+                        res.send('Internal error');
+                    } else {
+                        pipeS3Stream(bucket, key, credentials, res, function (err) {
+                            if (err) {
                                 res.statusCode = 401;
                                 res.send('401 Unauthorized');
-                                console.log('Failed to obtain S3 stream.');
                             }
-                        }
-                    });
+                        });
+                    }
+                });
+            }
+        });
+    };
+
+    getCredentials(username, password, function (credentials) {
+        if (credentials) {
+            pipeS3Stream(bucket, key, credentials, res, function (err) {
+                if (err) {
+                    console.log('First attempt to obtain S3 stream failed. Will re-authenticate with ADFS and try again.');
+                    refreshCredentials();
                 }
             });
+        } else {
+            refreshCredentials();
         }
     });
 };
