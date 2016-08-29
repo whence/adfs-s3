@@ -69,7 +69,7 @@ var pipeS3Stream = function (bucket, key, credentials, res, done) {
     var stream = request.createReadStream();
     stream.pipe(res);
 
-    stream.on('success', function () {
+    request.on('success', function () {
         console.log('Piped from S3 Bucket: ' + bucket + ' / Key: ' + key);
         done(null);
     });
