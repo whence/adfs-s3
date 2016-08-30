@@ -92,7 +92,7 @@ app.use(session({
     resave: false, // don't save session if unmodified
     saveUninitialized: false, // don't create session until something stored
     secret: 'shhhh, very secret',
-    cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+    cookie: { maxAge: 50 * 60 * 1000 } // 50 mins, slightly below the the adfs token expiry
 }));
 
 app.use(function(req, res, next){
