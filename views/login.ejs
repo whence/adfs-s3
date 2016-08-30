@@ -10,15 +10,12 @@
       .error {
           color: red
       }
-      .success {
-          color: green;
-      }
     </style>
   </head>
   <body>
 
     <h1>Login</h1>
-    <%- message %>
+    <p class="error"><%- message %></p>
     <form method="post" action="/login">
       <p>
         <label>Username:</label>
