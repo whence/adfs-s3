@@ -1,54 +1,19 @@
 var express = require('express');
-var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
+var bodyParser = require('body-parser');
+var session = require('express-session');
 var AWS = require('aws-sdk');
-var cache = require('memory-cache');
-var hasher = require('password-hash-and-salt');
 var fs = require('fs');
 var adfs = require('./adfs');
 
 var config = JSON.parse(fs.readFileSync('.config/adfs.json', { encoding: 'UTF8' }));
 
-var getCredentials = function (username, password, done) {
-    var user = cache.get(username);
-    if (user) {
-        hasher(password).verifyAgainst(user.password_hash, function (err, verified) {
-            if (err) {
-                done(null, null);
-            } else if (!verified) {
-                done(null, null);
-            } else {
-                console.log('Retrieved ' + username + ' credentials from cache.');
-                done(null, user.credentials);
-            }
-        });
-    } else {
-        done(null, null);
-    }
-};
-
-var storeCredentials = function (username, password, credentials, done) {
-    hasher(password).hash(function (err, hash) {
-        if (err) {
-            done(err);
-        } else {
-            var user = {
-                username: username,
-                password_hash: hash,
-                credentials: credentials
-            };
-            cache.put(username, user);
-            console.log(username + ' credentials cached.');
-            done(null);
-        }
-    });
-};
-
 var generateCredentials = function (username, password, done) {
+    console.log('Fetching assertion from ADFS host');
     adfs.fetchAssertion(config.host, username, password, function (err, assertion) {
         if (err) {
             done(err);
         } else {
+            console.log('Obtaining AWS credentials from assertion');
             adfs.obtainCredentials(config.roleArn, config.principalArn, assertion, function (err, credentials) {
                 if (err) {
                     done(err);
@@ -61,7 +26,11 @@ var generateCredentials = function (username, password, done) {
 };
 
 var pipeS3Stream = function (bucket, key, credentials, res, done) {
-    var s3 = new AWS.S3({ credentials: credentials });
+    var s3 = new AWS.S3({ credentials: new AWS.Credentials(
+        credentials.accessKeyId,
+        credentials.secretAccessKey,
+        credentials.sessionToken
+    )});
     var request = s3.getObject({
         Bucket: bucket,
         Key: key
@@ -82,60 +51,76 @@ var pipeS3Stream = function (bucket, key, credentials, res, done) {
 var handleS3Request = function (req, res) {
     var bucket = req.params[0];
     var key = req.params[1];
-    var username = req.user.username;
-    var password = req.user.password;
 
-    var refreshCredentials = function () {
-        generateCredentials(username, password, function (err, credentials) {
+    if (req.session.credentials) {
+        pipeS3Stream(bucket, key, req.session.credentials, res, function (err) {
             if (err) {
-                res.statusCode = 401;
-                res.send('401 Unauthorized');
-            } else {
-                storeCredentials(username, password, credentials, function (err) {
-                    if (err) {
-                        res.statusCode = 401;
-                        res.send('Internal error');
-                    } else {
-                        pipeS3Stream(bucket, key, credentials, res, function (err) {
-                            if (err) {
-                                res.statusCode = 401;
-                                res.send('401 Unauthorized');
-                            }
-                        });
-                    }
-                });
+                res.redirect('/login');
             }
         });
-    };
+    } else {
+        res.redirect('/login');
+    }
+};
 
-    getCredentials(username, password, function (err, credentials) {
+var handleLogin = function (req, res) {
+    var username = req.body.username;
+    var password = req.body.password;
+
+    generateCredentials(username, password, function (err, credentials) {
         if (err) {
-            res.statusCode = 500;
-            res.send('Internal error: ' + err);
-        } else if (credentials) {
-            pipeS3Stream(bucket, key, credentials, res, function (err) {
-                if (err) {
-                    console.log('First attempt to obtain S3 stream failed. Will re-authenticate with ADFS and try again.');
-                    refreshCredentials();
-                }
-            });
+            req.session.error = 'Authentication failed. ' + err;
+            res.redirect('/login');
         } else {
-            refreshCredentials();
+            req.session.regenerate(function (){
+                req.session.credentials = credentials;
+                res.redirect('back');
+            });
         }
     });
 };
 
-
 // configurate express
 
 var app = express();
-passport.use(new BasicStrategy(function (username, password, done) {
-    return done(null, { username: username, password: password });
+
+app.set('view engine', 'ejs');
+app.set('views', __dirname + '/views');
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({
+    resave: false, // don't save session if unmodified
+    saveUninitialized: false, // don't create session until something stored
+    secret: 'shhhh, very secret',
+    cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
 }));
 
+app.use(function(req, res, next){
+    var err = req.session.error;
+    var msg = req.session.success;
+    delete req.session.error;
+    delete req.session.success;
+    res.locals.message = '';
+    if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
+    if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
+    next();
+});
+
+app.get('/logout', function(req, res){
+    req.session.destroy(function(){
+        res.redirect('/');
+    });
+});
+
+app.get('/login', function(req, res){
+    res.render('login');
+});
+
+app.post('/login', handleLogin);
+
 app.get(/^\/s3\/(.+?)\/(.+)$/,
-    passport.authenticate('basic', { session: false }),
-    handleS3Request);
+    handleS3Request
+);
 
 var port = 3000;
 app.listen(port, function () {
