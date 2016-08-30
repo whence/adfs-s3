@@ -8,19 +8,21 @@ var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
 var flash = require('connect-flash');
 var AWS = require('aws-sdk');
 var fs = require('fs');
+var debug = require('debug');
 var adfs = require('./adfs');
 
 var config = JSON.parse(fs.readFileSync('.config/adfs.json', { encoding: 'UTF8' }));
 
 // adfs
 
+var debugAdfs = debug('adfs');
 var generateCredentials = function (username, password, done) {
-    console.log('Fetching assertion from ADFS host');
+    debugAdfs('Fetching assertion from ADFS host');
     adfs.fetchAssertion(config.host, username, password, function (err, assertion) {
         if (err) {
             done(err);
         } else {
-            console.log('Obtaining AWS credentials from assertion');
+            debugAdfs('Obtaining AWS credentials from assertion');
             adfs.obtainCredentials(config.roleArn, config.principalArn, assertion, function (err, credentials) {
                 if (err) {
                     done(err);
@@ -35,11 +37,12 @@ var generateCredentials = function (username, password, done) {
 
 // s3
 
-var pipeS3Stream = function (bucket, key, credentials, res, done) {
+var debugS3 = debug('s3');
+var pipeS3Stream = function (bucket, key, req, res, done) {
     var s3 = new AWS.S3({ credentials: new AWS.Credentials(
-        credentials.accessKeyId,
-        credentials.secretAccessKey,
-        credentials.sessionToken
+        req.user.credentials.accessKeyId,
+        req.user.credentials.secretAccessKey,
+        req.user.credentials.sessionToken
     )});
     var request = s3.getObject({
         Bucket: bucket,
@@ -49,11 +52,11 @@ var pipeS3Stream = function (bucket, key, credentials, res, done) {
     stream.pipe(res);
 
     request.on('success', function () {
-        console.log('Piped from S3 Bucket: ' + bucket + ' / Key: ' + key);
+        debugS3('%s piped from s3://%s/%s', req.user.username, bucket, key);
         done(null);
     });
     stream.on('error', function () {
-        console.log('Failed to obtain S3 stream.');
+        debugS3('%s failed to obtain S3 stream', req.user.username);
         done('Failed to pipe S3 stream');
     });
 };
@@ -61,11 +64,15 @@ var pipeS3Stream = function (bucket, key, credentials, res, done) {
 
 // passport
 
+var debugPassport = debug('passport');
+
 passport.use(new LocalStrategy(function(username, password, done) {
     generateCredentials(username, password, function (err, credentials) {
         if (err) {
+            debugPassport('%s login failed: %s', username, err);
             return done(null, false, { message: err });
         } else {
+            debugPassport('%s login succeed', username);
             done(null, { username: username, credentials: credentials });
         }
     });
@@ -82,6 +89,8 @@ passport.deserializeUser(function (json, done) {
 
 
 // express
+
+var debugExpress = debug('express');
 
 var app = express();
 
@@ -118,19 +127,15 @@ app.get(/^\/s3\/(.+?)\/(.+)$/,
         var bucket = req.params[0];
         var key = req.params[1];
 
-        if (req.user.credentials) {
-            pipeS3Stream(bucket, key, req.user.credentials, res, function (err) {
-                if (err) {
-                    res.redirect('/login');
-                }
-            });
-        } else {
-            res.redirect('/login');
-        }
+        pipeS3Stream(bucket, key, req, res, function (err) {
+            if (err) {
+                res.redirect('/login');
+            }
+        });
     }
 );
 
 var port = 3000;
 app.listen(port, function () {
-    console.log('Server running on localhost:' + port);
+    debugExpress('Server running on localhost:' + port);
 });
