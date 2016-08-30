@@ -327,6 +327,11 @@
       "from": "domutils@1.5.1",
       "resolved": "https://registry.npmjs.org/domutils/-/domutils-1.5.1.tgz"
     },
+    "double-ended-queue": {
+      "version": "2.1.0-0",
+      "from": "double-ended-queue@>=2.1.0-0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/double-ended-queue/-/double-ended-queue-2.1.0-0.tgz"
+    },
     "ecc-jsbn": {
       "version": "0.1.1",
       "from": "ecc-jsbn@>=0.1.1 <0.2.0",
@@ -1017,6 +1022,21 @@
       "version": "1.0.1",
       "from": "readline2@>=1.0.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/readline2/-/readline2-1.0.1.tgz"
+    },
+    "redis": {
+      "version": "2.6.2",
+      "from": "redis@latest",
+      "resolved": "https://registry.npmjs.org/redis/-/redis-2.6.2.tgz"
+    },
+    "redis-commands": {
+      "version": "1.2.0",
+      "from": "redis-commands@>=1.2.0 <2.0.0",
+      "resolved": "https://registry.npmjs.org/redis-commands/-/redis-commands-1.2.0.tgz"
+    },
+    "redis-parser": {
+      "version": "2.0.4",
+      "from": "redis-parser@>=2.0.0 <3.0.0",
+      "resolved": "https://registry.npmjs.org/redis-parser/-/redis-parser-2.0.4.tgz"
     },
     "request": {
       "version": "2.74.0",

@@ -61,10 +61,11 @@ exports.obtainCredentials = function (roleArn, principalArn, assertion, done) {
         if (err) {
             done(err);
         } else {
-            var credentials = new AWS.Credentials(
-                data.Credentials.AccessKeyId,
-                data.Credentials.SecretAccessKey,
-                data.Credentials.SessionToken);
+            var credentials = {
+                accessKeyId: data.Credentials.AccessKeyId,
+                secretAccessKey: data.Credentials.SecretAccessKey,
+                sessionToken: data.Credentials.SessionToken
+            };
             done(null, credentials);
         }
     });

@@ -19,6 +19,11 @@ console: update
 start: update
 	docker-compose run --rm --service-ports app
 
+.PHONY:	clean
+clean: tools
+	docker-compose stop
+	docker-compose rm -f -v
+
 .PHONY: start_local
 start_local:
 	npm install
