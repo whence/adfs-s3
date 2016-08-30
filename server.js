@@ -14,16 +14,16 @@ var getCredentials = function (username, password, done) {
     if (user) {
         hasher(password).verifyAgainst(user.password_hash, function (err, verified) {
             if (err) {
-                done(null);
+                done(null, null);
             } else if (!verified) {
-                done(null);
+                done(null, null);
             } else {
                 console.log('Retrieved ' + username + ' credentials from cache.');
-                done(user.credentials);
+                done(null, user.credentials);
             }
         });
     } else {
-        done(null);
+        done(null, null);
     }
 };
 
@@ -108,8 +108,11 @@ var handleS3Request = function (req, res) {
         });
     };
 
-    getCredentials(username, password, function (credentials) {
-        if (credentials) {
+    getCredentials(username, password, function (err, credentials) {
+        if (err) {
+            res.statusCode = 500;
+            res.send('Internal error: ' + err);
+        } else if (credentials) {
             pipeS3Stream(bucket, key, credentials, res, function (err) {
                 if (err) {
                     console.log('First attempt to obtain S3 stream failed. Will re-authenticate with ADFS and try again.');
