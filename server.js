@@ -17,12 +17,12 @@ var config = JSON.parse(fs.readFileSync('.config/adfs.json', { encoding: 'UTF8' 
 
 var debugAdfs = debug('adfs');
 var generateCredentials = function (username, password, done) {
-    debugAdfs('Fetching assertion from ADFS host');
+    debugAdfs('%s fetching assertion from ADFS host', username);
     adfs.fetchAssertion(config.host, username, password, function (err, assertion) {
         if (err) {
             done(err);
         } else {
-            debugAdfs('Obtaining AWS credentials from assertion');
+            debugAdfs('%s obtaining AWS credentials from assertion', username);
             adfs.obtainCredentials(config.roleArn, config.principalArn, assertion, function (err, credentials) {
                 if (err) {
                     done(err);
