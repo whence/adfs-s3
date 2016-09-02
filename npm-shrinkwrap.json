@@ -80,9 +80,9 @@
       }
     },
     "aws-sdk": {
-      "version": "2.5.4",
+      "version": "2.5.5",
       "from": "aws-sdk@>=2.5.3 <3.0.0",
-      "resolved": "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.5.4.tgz"
+      "resolved": "https://registry.npmjs.org/aws-sdk/-/aws-sdk-2.5.5.tgz"
     },
     "aws-sign2": {
       "version": "0.6.0",
@@ -129,9 +129,9 @@
       }
     },
     "bluebird": {
-      "version": "3.4.4",
+      "version": "3.4.6",
       "from": "bluebird@>=3.1.1 <4.0.0",
-      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.4.tgz"
+      "resolved": "https://registry.npmjs.org/bluebird/-/bluebird-3.4.6.tgz"
     },
     "body-parser": {
       "version": "1.15.2",
@@ -224,9 +224,9 @@
       "resolved": "https://registry.npmjs.org/concat-map/-/concat-map-0.0.1.tgz"
     },
     "concat-stream": {
-      "version": "1.5.1",
+      "version": "1.5.2",
       "from": "concat-stream@>=1.4.6 <2.0.0",
-      "resolved": "https://registry.npmjs.org/concat-stream/-/concat-stream-1.5.1.tgz",
+      "resolved": "https://registry.npmjs.org/concat-stream/-/concat-stream-1.5.2.tgz",
       "dependencies": {
         "readable-stream": {
           "version": "2.0.6",
