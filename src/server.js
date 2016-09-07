@@ -10,6 +10,7 @@ const AWS = require('aws-sdk');
 const fs = require('fs');
 const debug = require('debug');
 const async = require('async');
+const path = require('path');
 const adfs = require('./adfs');
 
 const config = JSON.parse(fs.readFileSync('.config/adfs.json', { encoding: 'UTF8' }));
@@ -26,7 +27,7 @@ function generateCredentials(username, password, done) {
     (assertion, cb) => {
       debugAdfs('%s obtaining AWS credentials from assertion', username);
       adfs.obtainCredentials(config.roleArn, config.principalArn, assertion, cb);
-    }
+    },
   ], done);
 }
 
@@ -42,7 +43,7 @@ function pipeS3Stream(bucket, key, req, res, done) {
   ) });
   const request = s3.getObject({
     Bucket: bucket,
-    Key: key
+    Key: key,
   });
   const stream = request.createReadStream();
   stream.pipe(res);
@@ -90,7 +91,7 @@ const debugExpress = debug('express');
 const app = express();
 
 app.set('view engine', 'ejs');
-app.set('views', `${__dirname}/views`);
+app.set('views', `${path.join(__dirname, '..', 'views')}`);
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -98,7 +99,7 @@ app.use(session({
   resave: false, // don't save session if unmodified
   saveUninitialized: false, // don't create session until something stored
   secret: 'shhhh, very secret',
-  cookie: { maxAge: 50 * 60 * 1000 } // 50 mins, slightly below the the adfs token expiry
+  cookie: { maxAge: 50 * 60 * 1000 }, // 50 mins, slightly below the the adfs token expiry
 }));
 app.use(flash());
 app.use(passport.initialize());
@@ -112,7 +113,7 @@ app.post('/login',
   passport.authenticate('local', {
     successReturnToOrRedirect: '/',
     failureRedirect: '/login',
-    failureFlash: true
+    failureFlash: true,
   })
 );
 

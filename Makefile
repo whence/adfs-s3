@@ -12,11 +12,12 @@ docker/build:
 docker/console: docker/build docker/sync-time
 	docker-compose run --rm app /bin/bash
 
-.PHONY:	docker/start
-docker/start: docker/build docker/sync-time
-	DEBUG=$(DEBUG) docker-compose run --rm --service-ports app
+.PHONY: build
+build:
+	npm install
+	npm run clean
+	npm run build
 
 .PHONY: start
-start:
-	npm install
+start: build
 	DEBUG=$(DEBUG) npm start

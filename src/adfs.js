@@ -18,14 +18,14 @@ function fetchAssertion(host, username, password, done) {
   const form = {
     UserName: username,
     Password: password,
-    AuthMethod: 'urn:amazon:webservices'
+    AuthMethod: 'urn:amazon:webservices',
   };
   const jar = request.jar();
   const options = {
     url,
     form,
     jar,
-    followAllRedirects: true
+    followAllRedirects: true,
   };
   request.post(options, (err, httpResponse, body) => {
     if (err) {
@@ -54,7 +54,7 @@ function obtainCredentials(roleArn, principalArn, assertion, done) {
     PrincipalArn: principalArn,
     RoleArn: roleArn,
     SAMLAssertion: assertion,
-    DurationSeconds: 3600
+    DurationSeconds: 3600,
   };
   const sts = new AWS.STS();
   sts.assumeRoleWithSAML(params, (err, data) => {
@@ -64,7 +64,7 @@ function obtainCredentials(roleArn, principalArn, assertion, done) {
       const credentials = {
         accessKeyId: data.Credentials.AccessKeyId,
         secretAccessKey: data.Credentials.SecretAccessKey,
-        sessionToken: data.Credentials.SessionToken
+        sessionToken: data.Credentials.SessionToken,
       };
       done(null, credentials);
     }

@@ -4,9 +4,11 @@
   "description": "A Proxy for AWS S3 using ADFS for authentication",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "mocha",
-    "check": "eslint ."
+    "build": "babel src --out-dir build",
+    "start": "node build/server.js",
+    "test": "mocha --recursive test",
+    "check": "eslint src",
+    "clean": "rimraf build"
   },
   "repository": {
     "type": "git",
@@ -35,10 +37,13 @@
     "request": "^2.74.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-preset-es2015": "^6.14.0",
     "eslint": "^3.4.0",
     "eslint-config-airbnb": "^10.0.1",
     "eslint-plugin-import": "^1.14.0",
     "eslint-plugin-jsx-a11y": "^2.2.1",
-    "eslint-plugin-react": "^6.2.0"
+    "eslint-plugin-react": "^6.2.0",
+    "rimraf": "^2.5.4"
   }
 }
