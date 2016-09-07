@@ -4,9 +4,5 @@
         "react",
         "jsx-a11y",
         "import"
-    ],
-    "env": {
-        "node": true,
-        "es6": true
-    }
+    ]
 }

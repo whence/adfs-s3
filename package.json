@@ -7,7 +7,7 @@
     "build": "babel src --out-dir build",
     "start": "node build/server.js",
     "test": "mocha --recursive test",
-    "check": "eslint src",
+    "lint": "eslint src",
     "clean": "rimraf build"
   },
   "repository": {

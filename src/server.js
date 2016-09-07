@@ -17,33 +17,29 @@ import { fetchAssertion, obtainCredentials } from './adfs';
 // adfs
 
 const debugAdfs = debug('adfs');
-function generateCredentials(username, password, done) {
-  async.auto({
-    config: ['config_raw', (r, cb) => {
-      cb(null, JSON.parse(r.config_raw));
-    }],
-    config_raw: async.memoize(
-      async.apply(
-        fs.readFile, path.join(__dirname, '..', '.config/adfs.json'), { encoding: 'UTF8' }
-      )
-    ),
-    assertion: ['config', (r, cb) => {
-      debugAdfs('%s fetching assertion from ADFS host', username);
-      fetchAssertion(r.config.host, username, password, cb);
-    }],
-    credentials: ['config', 'assertion', (r, cb) => {
-      debugAdfs('%s obtaining AWS credentials from assertion', username);
-      obtainCredentials(r.config.roleArn, r.config.principalArn, r.assertion, cb);
-    }],
-  }, (err, r) => {
-    if (err) {
-      done(err);
-    } else {
-      done(null, r.credentials);
-    }
-  });
-}
-
+const generateCredentials = async.seq(
+  (username, password, done) => {
+    async.auto({
+      config: ['config_raw', (r, cb) => {
+        cb(null, JSON.parse(r.config_raw));
+      }],
+      config_raw: async.memoize(
+        async.apply(
+          fs.readFile, path.join(__dirname, '..', '.config/adfs.json'), { encoding: 'UTF8' }
+        )
+      ),
+      assertion: ['config', (r, cb) => {
+        debugAdfs('%s fetching assertion from ADFS host', username);
+        fetchAssertion(r.config.host, username, password, cb);
+      }],
+      credentials: ['config', 'assertion', (r, cb) => {
+        debugAdfs('%s obtaining AWS credentials from assertion', username);
+        obtainCredentials(r.config.roleArn, r.config.principalArn, r.assertion, cb);
+      }],
+    }, done);
+  },
+  async.asyncify(x => x.credentials)
+);
 
 // s3
 

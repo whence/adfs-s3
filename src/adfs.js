@@ -1,16 +1,11 @@
 import request from 'request';
 import cheerio from 'cheerio';
 import AWS from 'aws-sdk';
+import async from 'async';
 
 export function isExpired(credentials, done) {
   const iam = new AWS.IAM({ credentials });
-  iam.getAccountSummary((err) => {
-    if (err) {
-      done(null, true);
-    } else {
-      done(null, false);
-    }
-  });
+  async.reflect(cb => iam.getAccountSummary(cb))(done);
 }
 
 export function fetchAssertion(host, username, password, done) {
@@ -57,16 +52,12 @@ export function obtainCredentials(roleArn, principalArn, assertion, done) {
     DurationSeconds: 3600,
   };
   const sts = new AWS.STS();
-  sts.assumeRoleWithSAML(params, (err, data) => {
-    if (err) {
-      done(err);
-    } else {
-      const credentials = {
-        accessKeyId: data.Credentials.AccessKeyId,
-        secretAccessKey: data.Credentials.SecretAccessKey,
-        sessionToken: data.Credentials.SessionToken,
-      };
-      done(null, credentials);
-    }
-  });
+  async.waterfall([
+    cb => sts.assumeRoleWithSAML(params, cb),
+    async.asyncify(data => ({
+      accessKeyId: data.Credentials.AccessKeyId,
+      secretAccessKey: data.Credentials.SecretAccessKey,
+      sessionToken: data.Credentials.SessionToken,
+    })),
+  ], done);
 }
