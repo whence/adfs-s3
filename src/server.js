@@ -13,22 +13,35 @@ const async = require('async');
 const path = require('path');
 const adfs = require('./adfs');
 
-const config = JSON.parse(fs.readFileSync('.config/adfs.json', { encoding: 'UTF8' }));
 
 // adfs
 
 const debugAdfs = debug('adfs');
 function generateCredentials(username, password, done) {
-  async.waterfall([
-    (cb) => {
+  async.auto({
+    config: ['config_raw', (r, cb) => {
+      cb(null, JSON.parse(r.config_raw));
+    }],
+    config_raw: async.memoize(
+      async.apply(
+        fs.readFile, path.join(__dirname, '..', '.config/adfs.json'), { encoding: 'UTF8' }
+      )
+    ),
+    assertion: ['config', (r, cb) => {
       debugAdfs('%s fetching assertion from ADFS host', username);
-      adfs.fetchAssertion(config.host, username, password, cb);
-    },
-    (assertion, cb) => {
+      adfs.fetchAssertion(r.config.host, username, password, cb);
+    }],
+    credentials: ['config', 'assertion', (r, cb) => {
       debugAdfs('%s obtaining AWS credentials from assertion', username);
-      adfs.obtainCredentials(config.roleArn, config.principalArn, assertion, cb);
-    },
-  ], done);
+      adfs.obtainCredentials(r.config.roleArn, r.config.principalArn, r.assertion, cb);
+    }],
+  }, (err, r) => {
+    if (err) {
+      done(err);
+    } else {
+      done(null, r.credentials);
+    }
+  });
 }
 
 
