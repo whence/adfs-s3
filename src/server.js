@@ -1,17 +1,17 @@
-const express = require('express');
-const cookieParser = require('cookie-parser');
-const bodyParser = require('body-parser');
-const session = require('express-session');
-const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
-const flash = require('connect-flash');
-const AWS = require('aws-sdk');
-const fs = require('fs');
-const debug = require('debug');
-const async = require('async');
-const path = require('path');
-const adfs = require('./adfs');
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import bodyParser from 'body-parser';
+import session from 'express-session';
+import passport from 'passport';
+import { Strategy } from 'passport-local';
+import { ensureLoggedIn } from 'connect-ensure-login';
+import flash from 'connect-flash';
+import AWS from 'aws-sdk';
+import fs from 'fs';
+import debug from 'debug';
+import async from 'async';
+import path from 'path';
+import { fetchAssertion, obtainCredentials } from './adfs';
 
 
 // adfs
@@ -29,11 +29,11 @@ function generateCredentials(username, password, done) {
     ),
     assertion: ['config', (r, cb) => {
       debugAdfs('%s fetching assertion from ADFS host', username);
-      adfs.fetchAssertion(r.config.host, username, password, cb);
+      fetchAssertion(r.config.host, username, password, cb);
     }],
     credentials: ['config', 'assertion', (r, cb) => {
       debugAdfs('%s obtaining AWS credentials from assertion', username);
-      adfs.obtainCredentials(r.config.roleArn, r.config.principalArn, r.assertion, cb);
+      obtainCredentials(r.config.roleArn, r.config.principalArn, r.assertion, cb);
     }],
   }, (err, r) => {
     if (err) {
@@ -76,7 +76,7 @@ function pipeS3Stream(bucket, key, req, res, done) {
 
 const debugPassport = debug('passport');
 
-passport.use(new LocalStrategy((username, password, done) => {
+passport.use(new Strategy((username, password, done) => {
   generateCredentials(username, password, (err, credentials) => {
     if (err) {
       debugPassport('%s login failed: %s', username, err);

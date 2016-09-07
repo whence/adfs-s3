@@ -1,8 +1,8 @@
-const request = require('request');
-const cheerio = require('cheerio');
-const AWS = require('aws-sdk');
+import request from 'request';
+import cheerio from 'cheerio';
+import AWS from 'aws-sdk';
 
-function isExpired(credentials, done) {
+export function isExpired(credentials, done) {
   const iam = new AWS.IAM({ credentials });
   iam.getAccountSummary((err) => {
     if (err) {
@@ -13,7 +13,7 @@ function isExpired(credentials, done) {
   });
 }
 
-function fetchAssertion(host, username, password, done) {
+export function fetchAssertion(host, username, password, done) {
   const url = `https://${host}/adfs/ls/IdpInitiatedSignOn.aspx?loginToRp=urn:amazon:webservices`;
   const form = {
     UserName: username,
@@ -49,7 +49,7 @@ function fetchAssertion(host, username, password, done) {
   });
 }
 
-function obtainCredentials(roleArn, principalArn, assertion, done) {
+export function obtainCredentials(roleArn, principalArn, assertion, done) {
   const params = {
     PrincipalArn: principalArn,
     RoleArn: roleArn,
@@ -70,7 +70,3 @@ function obtainCredentials(roleArn, principalArn, assertion, done) {
     }
   });
 }
-
-exports.isExpired = isExpired;
-exports.fetchAssertion = fetchAssertion;
-exports.obtainCredentials = obtainCredentials;
